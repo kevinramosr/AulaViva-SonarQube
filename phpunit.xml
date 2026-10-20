@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+         beStrictAboutCoverageMetadata="false">
+    <testsuites>
+        <testsuite name="AulaViva">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+   <source>
+    <include>
+        <directory suffix=".php">api</directory>
+        <directory suffix=".php">config</directory>
+
+        <file>activar_cuenta.php</file>
+        <file>aula.php</file>
+        <file>crear_invitacion.php</file>
+        <file>crear_profesor_prueba.php</file>
+        <file>crear_usuario_prueba.php</file>
+        <file>login.php</file>
+        <file>logout.php</file>
+        <file>mis_aulas.php</file>
+        <file>prueba_privada.php</file>
+    </include>
+</source>
+</phpunit>

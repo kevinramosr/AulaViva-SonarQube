@@ -1,0 +1,7 @@
+RewriteEngine On
+
+# GET /api/v1/aulas/1/alumnos
+RewriteRule ^aulas/([0-9]+)/alumnos/?$ aulas/alumnos/index.php?id=$1 [L,QSA]
+
+# GET /api/v1/aulas/1
+RewriteRule ^aulas/([0-9]+)/?$ aulas/detalle/index.php?id=$1 [L,QSA]

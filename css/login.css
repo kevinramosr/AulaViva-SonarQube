@@ -1,0 +1,130 @@
+body {
+    margin: 0px;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f7f8fa;
+}
+
+header {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    padding: 0px 40px;
+    background-color: #0b192e;
+}
+header h1{
+    color: white;
+    font-size: 28px;
+    text-align: left;
+    margin-left: 10px;
+}
+
+.logo-header {
+    width: 80px;
+    height: auto;
+    object-fit: contain;
+}
+
+main {
+    min-height: calc(100vh - 70px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login {
+    width: 400px;
+    background-color: white;
+    padding: 40px;
+    border-radius: 6px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.060);
+}
+
+.login h1 {
+    text-align: center;
+    margin-top: 0px;
+    margin-bottom: 30px;
+    font-size: 28px;
+    color: #0b192e;
+}
+
+.subtitulo {
+    text-align: center;
+    margin-top: -20px;
+    margin-bottom: 30px;
+    font-size: 14px;
+    color: #777777;
+}
+
+.login form {
+    display: flex;
+    flex-direction: column;
+}
+
+.login label {
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.login input {
+    height: 45px;
+    padding: 0px 12px;
+    margin-bottom: 20px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    outline: none;
+}
+
+.login input:focus {
+    border-color: black;
+}
+
+.login button {
+    height: 45px;
+    border: none;
+    border-radius: 5px;
+    background-color: #0b192e;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.logo-login {
+    display: block;
+    width: 120px;
+    margin: 0px auto 20px auto;
+}
+
+.error {
+    margin: 0px 0px 20px 0px;
+    padding: 10px;
+    background-color: #fff0f0;
+    border: 1px solid #e6a5a5;
+    border-radius: 5px;
+    color: #b42318;
+    font-size: 13px;
+    text-align: center;
+}
+
+.ayuda {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #dddddd;
+}
+
+.ayuda h2 {
+    margin: 0px 0px 10px 0px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #0b192e;
+}
+
+.ayuda p {
+    margin: 0px;
+    font-size: 13px;
+    color: #666666;
+}

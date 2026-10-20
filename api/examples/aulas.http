@@ -1,0 +1,26 @@
+@baseUrl = http://localhost/Aula%20viva/api/v1
+
+### Obtener aulas del profesor
+GET {{baseUrl}}/aulas/
+Accept: application/json
+
+### Obtener aula por ID
+GET {{baseUrl}}/aulas/1
+Accept: application/json
+
+### Obtener alumnos del aula
+GET {{baseUrl}}/aulas/1/alumnos
+Accept: application/json
+
+### Prueba RFC 7807 - método no permitido
+POST {{baseUrl}}/aulas/
+Content-Type: application/json
+Accept: application/problem+json
+
+### Prueba RFC 7807 - ID de aula inválido
+GET {{baseUrl}}/aulas/0
+Accept: application/problem+json
+
+### Prueba RFC 7807 - ID inválido en alumnos
+GET {{baseUrl}}/aulas/0/alumnos
+Accept: application/problem+json

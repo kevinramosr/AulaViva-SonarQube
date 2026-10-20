@@ -1,0 +1,26 @@
+@baseUrl = http://localhost/Aula%20viva/api/v1
+
+### Crear invitación
+POST {{baseUrl}}/invitaciones/
+Content-Type: application/json
+Accept: application/json
+Idempotency-Key: ejemplo-invitacion-001
+
+{
+  "email": "alumno-ejemplo@prueba.cl",
+  "rut": "66666666-6",
+  "username": "alumno-ejemplo",
+  "rol": "alumno"
+}
+
+### Prueba RFC 7807 - falta Idempotency-Key
+POST {{baseUrl}}/invitaciones/
+Content-Type: application/json
+Accept: application/problem+json
+
+{
+  "email": "prueba@prueba.cl",
+  "rut": "77777777-7",
+  "username": "prueba",
+  "rol": "alumno"
+}

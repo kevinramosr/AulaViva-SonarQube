@@ -1,0 +1,21 @@
+@baseUrl = http://localhost/Aula%20viva/api/v1
+
+### Iniciar sesión
+POST {{baseUrl}}/auth/login/
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identificador": "profesor1",
+  "password": "TU_PASSWORD_DE_PRUEBA"
+}
+
+### Prueba RFC 7807 - datos incompletos
+POST {{baseUrl}}/auth/login/
+Content-Type: application/json
+Accept: application/problem+json
+
+{
+  "identificador": "",
+  "password": ""
+}

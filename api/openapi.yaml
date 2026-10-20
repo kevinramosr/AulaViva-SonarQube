@@ -1,0 +1,678 @@
+openapi: 3.1.0
+
+info:
+  title: Aula Viva API
+  version: 1.0.0
+  description: >
+    API REST de Aula Viva para autenticación, consulta de aulas,
+    consulta de alumnos y creación idempotente de invitaciones.
+  contact:
+    name: Equipo Aula Viva
+
+servers:
+  - url: http://localhost/Aula%20viva/api/v1
+    description: Servidor local de desarrollo
+
+tags:
+  - name: Autenticación
+    description: Operaciones de autenticación.
+  - name: Aulas
+    description: Operaciones relacionadas con aulas y alumnos.
+  - name: Invitaciones
+    description: Operaciones para gestionar invitaciones.
+
+paths:
+
+  /auth/login:
+    post:
+      tags:
+        - Autenticación
+      summary: Iniciar sesión
+      description: >
+        Autentica a un usuario mediante su identificador y contraseña
+        e inicia una sesión mediante una cookie PHPSESSID.
+      operationId: iniciarSesion
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              identificador: profesor1
+              password: password-de-prueba
+
+      responses:
+        '200':
+          description: Sesión iniciada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                data:
+                  id: 2
+                  username: profesor1
+                  nombre: Profesor
+                  apellido: Prueba
+                  rol: profesor
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /aulas:
+    get:
+      tags:
+        - Aulas
+      summary: Obtener las aulas del profesor
+      description: >
+        Devuelve las aulas activas asociadas al profesor autenticado.
+      operationId: obtenerAulas
+
+      security:
+        - sessionCookie: []
+
+      responses:
+        '200':
+          description: Lista de aulas activas asignadas al profesor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AulasResponse'
+              example:
+                data:
+                  - id: 1
+                    nombre: 4° Medio A
+
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /aulas/{aulaId}:
+    get:
+      tags:
+        - Aulas
+      summary: Obtener un aula
+      description: >
+        Devuelve la información de un aula específica a la que
+        pertenece el profesor autenticado.
+      operationId: obtenerAula
+
+      security:
+        - sessionCookie: []
+
+      parameters:
+        - $ref: '#/components/parameters/AulaId'
+
+      responses:
+        '200':
+          description: Información del aula solicitada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AulaResponse'
+              example:
+                data:
+                  id: 1
+                  nombre: 4° Medio A
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /aulas/{aulaId}/alumnos:
+    get:
+      tags:
+        - Aulas
+      summary: Obtener los alumnos de un aula
+      description: >
+        Devuelve los alumnos activos pertenecientes al aula indicada.
+      operationId: obtenerAlumnosAula
+
+      security:
+        - sessionCookie: []
+
+      parameters:
+        - $ref: '#/components/parameters/AulaId'
+
+      responses:
+        '200':
+          description: Lista de alumnos activos del aula.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlumnosResponse'
+              example:
+                data:
+                  - id: 1
+                    rut: 11111111-1
+                    username: alumno1
+                    nombre: Alumno
+                    apellido: Prueba
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /invitaciones:
+    post:
+      tags:
+        - Invitaciones
+      summary: Crear una invitación
+      description: >
+        Crea una invitación de manera idempotente. Si se repite una
+        solicitud con la misma Idempotency-Key, la API devuelve la
+        invitación creada anteriormente en vez de crear una nueva.
+      operationId: crearInvitacion
+
+      security:
+        - sessionCookie: []
+
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitacionRequest'
+            example:
+              email: alumno5@prueba.cl
+              rut: 55555555-5
+              username: alumno5
+              rol: alumno
+
+      responses:
+        '201':
+          description: Invitación creada correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitacionResponse'
+              example:
+                data:
+                  id: 8
+                  email: alumno5@prueba.cl
+                  rut: 55555555-5
+                  username: alumno5
+                  rol: alumno
+                  expira_en: '2026-10-02T00:19:15Z'
+                  url_activacion: /activar_cuenta.php?token=token-de-ejemplo
+                meta:
+                  idempotent_replay: false
+
+        '200':
+          description: >
+            Solicitud idempotente repetida. Se devuelve la invitación
+            correspondiente a la operación original.
+          headers:
+            Idempotent-Replayed:
+              description: Indica que se reutilizó el resultado anterior.
+              schema:
+                type: boolean
+                example: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitacionReplayResponse'
+              example:
+                data:
+                  id: 8
+                  email: alumno5@prueba.cl
+                  rut: 55555555-5
+                  username: alumno5
+                  rol: alumno
+                  expira_en: '2026-10-02T00:19:15Z'
+                meta:
+                  idempotent_replay: true
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: PHPSESSID
+      description: >
+        Cookie de sesión generada después de iniciar sesión
+        correctamente mediante POST /auth/login.
+
+  parameters:
+    AulaId:
+      name: aulaId
+      in: path
+      required: true
+      description: Identificador único del aula.
+      schema:
+        type: integer
+        minimum: 1
+        example: 1
+
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: >
+        Clave única proporcionada por el cliente para evitar que
+        un reintento cree una segunda invitación.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 100
+        example: invitacion-alumno5-001
+
+  schemas:
+
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - identificador
+        - password
+      properties:
+        identificador:
+          type: string
+          minLength: 1
+          example: profesor1
+        password:
+          type: string
+          format: password
+          minLength: 1
+          example: password-de-prueba
+
+    UsuarioSesion:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - username
+        - nombre
+        - apellido
+        - rol
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 2
+        username:
+          type: string
+          example: profesor1
+        nombre:
+          type: string
+          example: Profesor
+        apellido:
+          type: string
+          example: Prueba
+        rol:
+          type: string
+          enum:
+            - alumno
+            - profesor
+          example: profesor
+
+    LoginResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/UsuarioSesion'
+
+    Aula:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - nombre
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 1
+        nombre:
+          type: string
+          minLength: 1
+          example: 4° Medio A
+
+    AulaResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/Aula'
+
+    AulasResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Aula'
+
+    Alumno:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - rut
+        - username
+        - nombre
+        - apellido
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 1
+        rut:
+          type: string
+          example: 11111111-1
+        username:
+          type: string
+          example: alumno1
+        nombre:
+          type: string
+          example: Alumno
+        apellido:
+          type: string
+          example: Prueba
+
+    AlumnosResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alumno'
+
+    InvitacionRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+        - rut
+        - username
+        - rol
+      properties:
+        email:
+          type: string
+          format: email
+          example: alumno5@prueba.cl
+        rut:
+          type: string
+          example: 55555555-5
+        username:
+          type: string
+          minLength: 1
+          example: alumno5
+        rol:
+          type: string
+          enum:
+            - alumno
+            - profesor
+          example: alumno
+
+    Invitacion:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - email
+        - rut
+        - username
+        - rol
+        - expira_en
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 8
+        email:
+          type: string
+          format: email
+          example: alumno5@prueba.cl
+        rut:
+          type: string
+          example: 55555555-5
+        username:
+          type: string
+          example: alumno5
+        rol:
+          type: string
+          enum:
+            - alumno
+            - profesor
+          example: alumno
+        expira_en:
+          type: string
+          format: date-time
+          example: '2026-10-02T00:19:15Z'
+        url_activacion:
+          type: string
+          example: /activar_cuenta.php?token=token-de-ejemplo
+
+    IdempotencyMeta:
+      type: object
+      additionalProperties: false
+      required:
+        - idempotent_replay
+      properties:
+        idempotent_replay:
+          type: boolean
+          example: false
+
+    InvitacionResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: '#/components/schemas/Invitacion'
+        meta:
+          $ref: '#/components/schemas/IdempotencyMeta'
+
+    InvitacionReplay:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - email
+        - rut
+        - username
+        - rol
+        - expira_en
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 8
+        email:
+          type: string
+          format: email
+          example: alumno5@prueba.cl
+        rut:
+          type: string
+          example: 55555555-5
+        username:
+          type: string
+          example: alumno5
+        rol:
+          type: string
+          enum:
+            - alumno
+            - profesor
+          example: alumno
+        expira_en:
+          type: string
+          format: date-time
+          example: '2026-10-02T00:19:15Z'
+
+    InvitacionReplayResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: '#/components/schemas/InvitacionReplay'
+        meta:
+          $ref: '#/components/schemas/IdempotencyMeta'
+
+    Problem:
+      type: object
+      additionalProperties: true
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - instance
+      properties:
+        type:
+          type: string
+          example: /errors/no-autenticado
+        title:
+          type: string
+          example: No autenticado
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+          example: 401
+        detail:
+          type: string
+          example: Debes iniciar sesión para utilizar este recurso.
+        instance:
+          type: string
+          example: /Aula%20viva/api/v1/aulas/
+
+  responses:
+
+    BadRequest:
+      description: La solicitud contiene datos inválidos.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: /errors/datos-incompletos
+            title: Datos incompletos
+            status: 400
+            detail: Faltan datos obligatorios en la solicitud.
+            instance: /Aula%20viva/api/v1/invitaciones/
+
+    Unauthorized:
+      description: No existe una sesión autenticada válida.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: /errors/no-autenticado
+            title: No autenticado
+            status: 401
+            detail: Debes iniciar sesión para utilizar este recurso.
+            instance: /Aula%20viva/api/v1/aulas/
+
+    Forbidden:
+      description: El usuario no tiene permiso para acceder al recurso.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: /errors/acceso-denegado
+            title: Acceso denegado
+            status: 403
+            detail: No tienes permisos para utilizar este recurso.
+            instance: /Aula%20viva/api/v1/aulas/1
+
+    Conflict:
+      description: La operación entra en conflicto con un recurso existente.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: /errors/invitacion-duplicada
+            title: Invitación duplicada
+            status: 409
+            detail: Ya existe una invitación activa para este email.
+            instance: /Aula%20viva/api/v1/invitaciones/
+
+    MethodNotAllowed:
+      description: El método HTTP utilizado no está permitido.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: /errors/metodo-no-permitido
+            title: Método no permitido
+            status: 405
+            detail: Este método HTTP no está permitido para el recurso.
+            instance: /Aula%20viva/api/v1/aulas/
+
+    InternalServerError:
+      description: Ocurrió un error interno del servidor.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: /errors/error-interno
+            title: Error interno del servidor
+            status: 500
+            detail: Ocurrió un error interno al procesar la solicitud.
+            instance: /Aula%20viva/api/v1/aulas/
