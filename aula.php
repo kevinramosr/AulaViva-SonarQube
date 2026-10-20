@@ -1,7 +1,10 @@
 <?php
 
 require_once __DIR__ . '/config/rol.php';
-require_once __DIR__ . '/config/conexion.php';
+
+if (!isset($pdo) || !($pdo instanceof PDO)) {
+    require_once __DIR__ . '/config/conexion.php';
+}
 
 /* SOLO PROFESORES */
 
@@ -9,7 +12,9 @@ exigirRol('profesor');
 
 /* VALIDAR ID DEL AULA */
 
-$aulaId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+$aulaId = PHP_SAPI === 'cli'
+    ? filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT)
+    : filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 if (!$aulaId || $aulaId < 1) {
     http_response_code(400);

@@ -22,7 +22,13 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
-$contenido = file_get_contents('php://input');
+// Permitir JSON simulado únicamente durante las pruebas CLI.
+$contenido = (
+    PHP_SAPI === 'cli' && isset($contenidoPrueba)
+)
+    ? $contenidoPrueba
+    : file_get_contents('php://input');
+
 $datos = json_decode($contenido, true);
 
 if (!is_array($datos)) {

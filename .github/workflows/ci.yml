@@ -11,33 +11,71 @@ permissions:
   packages: write
 
 jobs:
-  quality:
+    quality:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Descargar código
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
+      - name: Configurar PHP
+        uses: shivammathur/setup-php@v2
         with:
-          node-version: '20'
+          php-version: '8.2'
+          extensions: mbstring, pdo_sqlite, sqlite3, pdo_pgsql
+          coverage: xdebug
+          tools: composer:v2
 
-      - name: Lint y Tests (Cobertura >= 70%)
+      - name: Instalar dependencias
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Verificar sintaxis PHP
+        shell: bash
         run: |
-          echo "Ejecutando linter de la aplicación..."
-          echo "Linter superado exitosamente."
-          echo "Ejecutando suite de tests unitarios..."
-          echo "Tests superados."
-          echo "Verificando cobertura de código..."
-          echo "-----------------------------------"
-          echo "Coverage total: 85% (Supera el 70% exigido por la rúbrica)"
+          find api config tests -type f -name '*.php' -print0 |
+            xargs -0 -r -n1 php -l
 
-      - name: Semgrep SAST (Seguridad)
+      - name: Ejecutar PHPUnit y generar cobertura
+        env:
+          XDEBUG_MODE: coverage
+        run: vendor/bin/phpunit --coverage-clover coverage.xml
+
+      - name: Verificar cobertura mínima del 70%
+        run: |
+          php -r '
+          $xml = simplexml_load_file("coverage.xml");
+
+          if ($xml === false) {
+              fwrite(STDERR, "No se pudo leer coverage.xml\n");
+              exit(1);
+          }
+
+          $metrics = $xml->project->metrics;
+          $total = (int) $metrics["statements"];
+          $covered = (int) $metrics["coveredstatements"];
+
+          if ($total === 0) {
+              fwrite(STDERR, "No hay líneas para medir cobertura\n");
+              exit(1);
+          }
+
+          $coverage = ($covered / $total) * 100;
+          printf("Cobertura real: %.2f%%\n", $coverage);
+
+          if ($coverage < 70) {
+              fwrite(STDERR, "ERROR: cobertura inferior al 70%\n");
+              exit(1);
+          }
+
+          echo "Cobertura aprobada.\n";
+          '
+
+      - name: Semgrep SAST
         uses: returntocorp/semgrep-action@v1
         with:
-          config: "p/nodejs"
+          config: "p/php"
 
-  build-and-push:
+    build-and-push:
     needs: quality
     runs-on: ubuntu-latest
     steps:

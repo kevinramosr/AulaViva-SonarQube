@@ -1,5 +1,10 @@
 <?php
+
 declare(strict_types=1);
+
+class RespuestaApiTerminada extends RuntimeException
+{
+}
 
 /**
  * Construye la respuesta de error según RFC 7807.
@@ -22,6 +27,7 @@ function construirProblema(
 /**
  * Envía la respuesta de error y termina la ejecución.
  */
+
 function responderProblema(
     int $status,
     string $title,
@@ -37,8 +43,13 @@ function responderProblema(
         JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
     );
 
-    exit;
+    if (defined('PHPUNIT_API_TEST') && PHPUNIT_API_TEST === true) {
+    throw new RespuestaApiTerminada();
 }
+
+exit;
+}
+
 /**
  * Comprueba la autorización de un usuario en la API.
  *

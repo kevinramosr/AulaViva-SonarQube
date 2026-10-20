@@ -1,7 +1,11 @@
 <?php
 
 require_once __DIR__ . '/config/rol.php';
-require_once __DIR__ . '/config/conexion.php';
+
+// Permite utilizar una base de datos aislada en las pruebas.
+if (!isset($pdo) || !($pdo instanceof PDO)) {
+    require_once __DIR__ . '/config/conexion.php';
+}
 
 /* SOLO PROFESORES */
 
