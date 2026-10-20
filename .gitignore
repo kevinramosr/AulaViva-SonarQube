@@ -32,3 +32,6 @@ prueba_privada.php
 # Archivos generados por PHPUnit
 /.phpunit.cache/
 /coverage/
+# Archivos generados por pruebas
+/coverage.xml
+/debug_aula.txt

@@ -1,6 +1,10 @@
 <?php
 
-require_once __DIR__ . '/config/conexion.php';
+// Utilizar la conexión proporcionada por las pruebas.
+// En producción se mantiene la conexión habitual.
+if (!isset($pdo) || !($pdo instanceof PDO)) {
+    require_once __DIR__ . '/config/conexion.php';
+}
 
 $token = $_GET['token'] ?? '';
 

@@ -1,8 +1,14 @@
 <?php
 
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
-require_once __DIR__ . '/config/conexion.php';
+// En producción utiliza la conexión normal.
+// En las pruebas permite inyectar una conexión aislada.
+if (!isset($pdo) || !($pdo instanceof PDO)) {
+    require_once __DIR__ . '/config/conexion.php';
+}
 
 $error = '';
 

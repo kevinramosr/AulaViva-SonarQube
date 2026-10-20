@@ -1,7 +1,12 @@
 <?php
 
 require_once __DIR__ . '/../_helpers/api.php';
-require_once __DIR__ . '/../../../config/conexion.php';
+
+// Utilizar una conexión de prueba si ya fue proporcionada.
+// En la aplicación normal, seguir utilizando la conexión real.
+if (!isset($pdo) || !($pdo instanceof PDO)) {
+    require_once __DIR__ . '/../../../config/conexion.php';
+}
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -55,7 +60,12 @@ if (strlen($idempotencyKey) > 100) {
 |--------------------------------------------------------------------------
 */
 
-$contenido = file_get_contents('php://input');
+$contenido = (
+    PHP_SAPI === 'cli' && isset($contenidoPrueba)
+)
+    ? $contenidoPrueba
+    : file_get_contents('php://input');
+
 $datos = json_decode($contenido, true);
 
 if (!is_array($datos)) {
